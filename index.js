@@ -1,30 +1,41 @@
+require('dotenv').config()
+
 const express = require('express');
+const mongoose = require('mongoose');
+const userRouter = require('./routes/userRoutes.js')
+const employeeRouter = require('./routes/employeeRoutes.js')
+
 const app = express();
-const SERVER_PORT = process.env.port || 3000;
+app.use(express.json());
 
-// http://localhost:3000/
-app.get('/', (req, res) => {
-    res.send('Hello World');
-})
+// const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true }};
 
-app.get('/hello', (req, res) => {
-    res.send('Hello Express JS');
-})
+async function run() {
+  try {
+    // await mongoose.connect(uri, clientOptions);
+    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connection.db.admin().command({ ping: 1 });
+    
+    
+    // =============================
+    app.get('/', (req, res) => {
+        res.send('Welcome to Assignment 1');
+    })
 
-app.get('/user', (req, res) => {
-    const fname = req.query.firstname || "Pritish";
-    const lname = req.query.lastname || "Patel";
-    res.json({"firstname":fname, "lastname": lname}); 
-})
+    app.use('/api/v1/user', userRouter);
+    app.use('/api/v1/emp',employeeRouter);
 
-// http://localhost:3000/
-app.post('/user/:firstname/:lastname', (req, res) => {
-    const fname = req.params.firstname;
-    const lname = req.params.lastname;
-    res.json({"firstname":fname, "lastname": lname}); 
-})
+    app.listen(process.env.PORT, () => { console.log('Server is running...') });
 
-// Listen to the server
-app.listen(SERVER_PORT, () => {
-    console.log(`Server is running on http://localhost:${SERVER_PORT}`);
-})
+    // =============================
+
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } 
+  finally {
+    // await mongoose.disconnect();
+  }
+}
+
+run().catch(console.dir);
+
+
