@@ -49,16 +49,15 @@ router.post('/login', async (req, res) => {
             $or: [{email: credentials}, {username: credentials}] // query both fields for match
         });
 
-        if(user){
-            const result = await bcrypt.compare(password, user.password); // check pw
-            if (result)
-                res.status(200).send({status: true, message: `User '${user.username}' logged in successfully`}); 
-            else 
-                res.status(401).send({status: false, message: "Authentication unsuccessful."}); 
-        } else {
+        if(!user)
             res.status(404).send({status: false, message: "User cannot be found."})
-        }
-        
+
+        const result = await bcrypt.compare(password, user.password); // check pw
+        if (result)
+            res.status(200).send({status: true, message: `User '${user.username}' logged in successfully`}); 
+        else 
+            res.status(401).send({status: false, message: "Authentication unsuccessful."}); 
+ 
         
 
     } catch (err) {
