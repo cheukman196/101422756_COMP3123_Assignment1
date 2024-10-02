@@ -9,7 +9,7 @@ const SERVER_PORT = process.env.PORT || 3000;
 
 // configure environment (based on current .env)
 var nodeEnv = process.env.NODE_ENV || "development";
-configDotenv.config({ path: `.env.${nodeEnv}`})
+require('dotenv').config({ path: `.env.${nodeEnv}`});
 
 const app = express();
 app.use(express.json());
