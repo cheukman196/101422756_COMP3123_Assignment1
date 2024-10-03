@@ -1,3 +1,7 @@
+const { validationResult, matchedData, checkSchema } = require('express-validator');
+const { createUserValidationSchema } = require('../utils/createUserValidationSchema.js');
+
+
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -6,8 +10,13 @@ const User = require('../model/user.js');
 
 // route: POST /api/v1/user/signup
 // create user 
-router.post('/signup', async (req, res) => {
+router.post('/signup', checkSchema(createUserValidationSchema), 
+    async (req, res) => {
     try {
+        // check validation
+        const result = validationResult(req);
+        console.log(result);
+
         // hash password
         const password = req.body.password;
         const saltRounds = 10; // defines computational cost, default 10
