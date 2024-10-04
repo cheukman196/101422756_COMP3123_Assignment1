@@ -76,7 +76,7 @@ router.post('/login',
         }
 
         // extract from request body
-        const {email, username, password} = validationResult(req);
+        const {email, username, password} = matchedData(req);
         const credentials = email || username; // either email or user
 
         const user = await User.findOne({
