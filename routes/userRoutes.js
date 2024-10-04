@@ -1,6 +1,5 @@
-const { validationResult, matchedData, checkSchema } = require('express-validator');
-const { createUserValidationSchema } = require('../utils/createUserValidationSchema.js');
-
+const { validationResult, matchedData, checkSchema, oneOf, body, query } = require('express-validator');
+const createUserValidationSchema = require("../utils/createUserValidationSchema.js");
 
 const express = require('express');
 const router = express.Router();
@@ -10,21 +9,27 @@ const User = require('../model/user.js');
 
 // route: POST /api/v1/user/signup
 // create user 
-router.post('/signup', checkSchema(createUserValidationSchema), 
+router.post('/signup', 
+    checkSchema(createUserValidationSchema),
     async (req, res) => {
     try {
         // check validation
-        const result = validationResult(req);
-        console.log(result);
+        const expressValidationResult = validationResult(req);
+        if(!expressValidationResult.isEmpty()){
+            return res.status(400).send({
+                message: "Oops, you've entered some invalid fields",
+                error: expressValidationResult.array()});
+        }
+        const validData = matchedData(req);
 
         // hash password
-        const password = req.body.password;
+        const password = validData.password;
         const saltRounds = 10; // defines computational cost, default 10
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
         const newUser = new User({
-            username: req.body.username,
-            email: req.body.email,
+            username: validData.username,
+            email: validData.email,
             password: passwordHash
         });
         await newUser.save(); // persist to db
@@ -36,8 +41,15 @@ router.post('/signup', checkSchema(createUserValidationSchema),
             user_id: newUser._id
         });
     } catch (err) {
+        if('code' in err && err.code == 11000){
+            return res.status(500).send({ 
+                message: "Duplicate username or email.", 
+                status: 'Status 500: internal server error', 
+                error: err 
+            });
+        }
 
-        res.status(500).send({ 
+        return res.status(500).send({ 
             message: "Signup operation failed", 
             status: 'Status 500: internal server error', 
             error: err 
@@ -48,8 +60,19 @@ router.post('/signup', checkSchema(createUserValidationSchema),
 
 // route: POST /api/v1/user/login
 // authenticate login by username/email
-router.post('/login', async (req, res) => {  
+router.post('/login', 
+    oneOf([body('username').notEmpty(), body('email').notEmpty()],
+    { message: "Username or email must be provided."}),
+    body('password').notEmpty().isString(),
+    async (req, res) => {
     try {
+        const expressValidationResult = validationResult(req);
+        if(!expressValidationResult.isEmpty()){
+            return res.status(400).send({
+                message: "Oops, you've entered some invalid fields",
+                error: expressValidationResult.array()});
+        }
+
         // extract from request body
         const {email, username, password} = req.body;
         const credentials = email || username; // either email or user
@@ -59,13 +82,13 @@ router.post('/login', async (req, res) => {
         });
 
         if(!user)
-            res.status(404).send({status: false, message: "User cannot be found."})
+            return res.status(404).send({status: false, message: "User cannot be found."})
 
         const result = await bcrypt.compare(password, user.password); // check pw
         if (result)
-            res.status(200).send({status: true, message: `User '${user.username}' logged in successfully`}); 
+            return res.status(200).send({status: true, message: `User '${user.username}' logged in successfully`}); 
         else 
-            res.status(401).send({status: false, message: "Authentication unsuccessful."}); 
+            return res.status(401).send({status: false, message: "Authentication unsuccessful."}); 
  
         
 

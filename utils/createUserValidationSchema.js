@@ -4,8 +4,8 @@ const createUserValidationSchema = {
             errorMessage: 'Username should be a string.'
         },
         isLength: {
-            options: {min: 8, max: 25},
-            errorMessage: 'Username should be between 8 - 25 characters.'
+            options: {min: 5, max: 25},
+            errorMessage: 'Username should be between 5 - 25 characters.'
         },
         notEmpty: {
             errorMessage: 'Username should not be empty.'
@@ -17,8 +17,8 @@ const createUserValidationSchema = {
             errorMessage: 'Password should be a string.'
         },
         isLength: {
-            options: {min: 8, max: 32},
-            errorMessage: 'Password should be between 8 - 32 characters.'
+            options: {min: 6, max: 32},
+            errorMessage: 'Password should be between 6 - 32 characters.'
         },
         notEmpty: {
             errorMessage: 'Password should not be empty.'
@@ -30,7 +30,7 @@ const createUserValidationSchema = {
             errorMessage: 'Email should be a string.'
         },
         isEmail: {
-            errorMessage: 'Email should be between 8 - 32 characters.'
+            errorMessage: 'Email provide not in proper formatt.'
         },
         notEmpty: {
             errorMessage: 'Email should not be empty.'
@@ -38,5 +38,4 @@ const createUserValidationSchema = {
     }
 };
 
-
-
+module.exports = createUserValidationSchema;
