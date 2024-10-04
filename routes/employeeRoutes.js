@@ -125,7 +125,12 @@ router.put('/employees/:eid',
         const { first_name, last_name, email, position, 
             salary, date_of_joining, department } = data;
         
-        const employee = await Employee.findOneAndUpdate(
+        const employee = await Employee.findOne({_id: req.params.eid});
+        if(!employee){
+            return res.status(404).send({status: false, message: `Employee with given id cannot be found.`});
+        }
+   
+        const updatedEmployee = await Employee.findOneAndUpdate(
             {_id: req.params.eid},  
             // $set indicates which fields to update
             { $set:
@@ -146,12 +151,8 @@ router.put('/employees/:eid',
             {new: true}
 
         );
-
-        const id = employee._id;
-        if(employee)
-            return res.status(200).send({status: true, message: `Employee '${id}' updated successfully `});
-        else
-            return res.status(404).send({status: false, message: `Employee with id '${id}' cannot be found'`});
+        return res.status(200).send({status: true, message: `Employee '${updatedEmployee._id}' updated successfully `});
+     
 
     } catch (err) {
 
