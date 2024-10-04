@@ -64,8 +64,8 @@ router.post('/login',
     oneOf([body('username').notEmpty(), body('email').notEmpty()],
     { message: "Username or email must be provided."}),
     body('password')
-        .notEmpty().message('Password cannot be empty.')
-        .isString().message('Password must be a string.'),
+        .notEmpty().withMessage('Password cannot be empty.')
+        .isString().withMessage('Password must be a string.'),
     async (req, res) => {
     try {
         const expressValidationResult = validationResult(req);
