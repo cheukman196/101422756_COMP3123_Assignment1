@@ -1,4 +1,4 @@
-const { validationResult, matchedData, checkSchema, oneOf, body, query } = require('express-validator');
+const { validationResult, matchedData, checkSchema, oneOf, body } = require('express-validator');
 const createUserValidationSchema = require("../utils/createUserValidationSchema.js");
 
 const express = require('express');
