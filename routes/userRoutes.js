@@ -63,7 +63,9 @@ router.post('/signup',
 router.post('/login', 
     oneOf([body('username').notEmpty(), body('email').notEmpty()],
     { message: "Username or email must be provided."}),
-    body('password').notEmpty().isString(),
+    body('password')
+        .notEmpty().message('Password cannot be empty.')
+        .isString().message('Password must be a string.'),
     async (req, res) => {
     try {
         const expressValidationResult = validationResult(req);
@@ -74,7 +76,7 @@ router.post('/login',
         }
 
         // extract from request body
-        const {email, username, password} = req.body;
+        const {email, username, password} = validationResult(req);
         const credentials = email || username; // either email or user
 
         const user = await User.findOne({
